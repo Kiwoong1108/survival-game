@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>서바이벌 패치노트</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+/* Layout: 왼쪽에 버전 목차(좁은 화면에서는 가로 칩), 오른쪽에 최신순 패치 기록. 게임과 같은 숲 바닥 다크 룩 한 가지. */
+:root{
+  --bg:#0f1613;
+  --panel:#16211c;
+  --line:#2f4239;
+  --fg:#ecf1ea;
+  --dim:#9fb2a6;
+  --gold:#f2c14e;
+  --add:#6fe3a1;
+  --chg:#f2c14e;
+  --del:#ff8a9b;
+  --fix:#7fd0ff;
+  --display:'Do Hyeon','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --body:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --pixel:'Press Start 2P',ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--fg);
+  font:15px/1.65 var(--body);
+  padding-block:28px 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.page{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;border-bottom:1px solid var(--line);padding-bottom:18px}
+h1{font:400 38px/1.1 var(--display);margin:0;letter-spacing:.03em;text-wrap:balance}
+.sub{margin:6px 0 0;color:var(--dim);font-size:14px}
+.cur{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cur .lbl{color:var(--dim);font-size:13px}
+.badge{font:400 12px/1 var(--pixel);color:#201807;background:var(--gold);padding:8px 10px;border-radius:3px}
+.play{font:400 18px/1 var(--display);color:var(--gold);text-decoration:none;border:1px solid var(--gold);padding:9px 18px;border-radius:4px;letter-spacing:.05em}
+.play:hover,.play:focus-visible{background:var(--gold);color:#201807;outline:none}
+.layout{display:grid;grid-template-columns:150px minmax(0,1fr);gap:36px;align-items:start}
+nav{position:sticky;top:max(16px,env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:2px}
+nav .t{font-size:12px;letter-spacing:.14em;color:var(--dim);margin-bottom:8px}
+nav a{
+  font:400 11px/1 var(--pixel);color:var(--dim);text-decoration:none;
+  padding:11px 10px;border-left:2px solid var(--line);
+}
+nav a:hover,nav a:focus-visible,nav a[aria-current="true"]{color:var(--gold);border-left-color:var(--gold);outline:none}
+main{display:flex;flex-direction:column;min-width:0}
+.entry{
+  display:grid;grid-template-columns:130px minmax(0,1fr);gap:8px 28px;
+  padding-block:26px;border-top:1px solid var(--line);scroll-margin-top:16px;
+}
+.entry:first-child{border-top:0;padding-top:0}
+.meta{display:flex;flex-direction:column;gap:6px}
+.ver{font:400 15px/1.2 var(--pixel);color:var(--fg)}
+.entry.latest .ver{color:var(--gold)}
+.new{font:400 10px/1 var(--pixel);color:#201807;background:var(--gold);padding:6px 7px;border-radius:2px;align-self:flex-start}
+.body{min-width:0;display:flex;flex-direction:column;gap:16px}
+h2{font:400 26px/1.2 var(--display);margin:0;letter-spacing:.02em;text-wrap:balance}
+.group{display:flex;flex-direction:column;gap:6px}
+.tag{
+  align-self:flex-start;font:700 12px/1 var(--body);letter-spacing:.06em;padding:5px 9px;border-radius:3px;
+  border:1px solid currentColor;
+}
+.tag.add{color:var(--add)}.tag.chg{color:var(--chg)}.tag.del{color:var(--del)}.tag.fix{color:var(--fix)}
+ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px}
+li{max-width:68ch;text-wrap:pretty}
+li::marker{color:var(--dim)}
+ul.sub{margin-top:4px;gap:2px;padding-left:16px;list-style:'- ';color:var(--dim);font-size:14px}
+footer{color:var(--dim);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+@media (max-width:760px){
+  h1{font-size:30px}
+  .layout{grid-template-columns:minmax(0,1fr);gap:20px}
+  nav{position:static;flex-direction:row;flex-wrap:wrap;gap:6px}
+  nav .t{display:none}
+  nav a{border-left:0;border:1px solid var(--line);border-radius:3px;padding:9px 10px}
+  nav a:hover,nav a:focus-visible,nav a[aria-current="true"]{border-color:var(--gold)}
+  .entry{grid-template-columns:minmax(0,1fr)}
+  .meta{flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px 12px}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+
+<div class="page">
+  <header>
+    <div>
+      <h1>서바이벌 패치노트</h1>
+      <p class="sub">버전별 변경 내용을 최신순으로 정리했습니다.</p>
+    </div>
+    <div class="cur">
+      <span class="lbl">현재 버전</span>
+      <span class="badge" id="cur-ver">v0.4.0</span>
+      <a class="play" href="https://claude.ai/artifact/UQ7sDUVjmkDcaWQdtVhurS" target="_blank" rel="noopener">게임 열기</a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav id="nav" aria-label="버전 목차"><span class="t">버전</span></nav>
+    <main id="list"></main>
+  </div>
+
+  <footer>새 버전이 올라가면 이 페이지에 항목이 추가됩니다.</footer>
+</div>
+
+<script>
+/* 패치 기록. 새 버전은 배열 맨 앞에 추가합니다. kind: add 추가 / chg 변경 / del 제거 / fix 수정.
+   항목은 문자열이거나 {t:'제목', sub:['세부', ...]} 입니다. */
+const PATCHES=[
+  {v:'0.4.0',title:'레벨업 선택지와 특수 능력',
+   groups:[
+    {kind:'add',items:[
+      {t:'이제 레벨업할 때마다 일반 선택지 3개 중 하나를 고릅니다. 특수 능력이 나오는 10, 20, 25레벨은 제외입니다.',sub:['공격력, 공격속도, 이동속도, 체력, 방어력 중에서 나오고, 각각 최대 5단계입니다.','5단계까지 찍어야 겨우 체감될 정도로 효과가 작습니다.','공격력 +2%, 공격속도 +2%, 이동속도 +1.5%, 체력 +4, 방어력 +0.5가 단계마다 쌓입니다.']},
+      '이제 일반 선택지와 보물상자 선택지는 은색 배경으로 나오고, 아래의 동그라미 5개가 한 칸씩 채워집니다.',
+      '이제 특수 능력 선택지는 금색 배경으로 나오고, 아래의 별 3개가 한 칸씩 채워집니다.'
+    ]},
+    {kind:'add',items:[
+      {t:'이제 루테란이 10, 20, 25레벨에 특수 능력을 선택합니다. 한 번 고른 능력은 고정되고, 이후 20, 25레벨에 한 단계씩 강해집니다. 최대 3단계입니다.',sub:['2회 공격: 공격 6회, 5회, 4회마다 1번, 공격이 시전된 방향으로 한 번 더 공격합니다. 추가 공격은 80% 피해를 줍니다.','칼 사거리 증가: 칼 사거리가 한 단계마다 15%씩 늘어납니다.','주변 공격 (360도): 7초, 6초, 5초마다 주변 360도를 한 바퀴 돌며 벱니다.']},
+      {t:'이제 루테란이 25레벨에서 특수 능력을 고른 뒤, 무지개색으로 빛나는 선택지로 필살기 「루테란의 긍지」를 얻습니다.',sub:['몬스터를 100마리 처치할 때마다 스페이스바로 사용합니다.','화면 하단 게이지가 처치할 때마다 차고, 가득 차면 하늘색으로 은은하게 빛납니다.','사용하면 화면이 서서히 하얗게 밝아졌다가, 몬스터가 가장 많은 방향으로 화면 끝까지 검을 내리찍습니다. 가로 범위는 몬스터 4마리 정도이고, 바닥이 불규칙하게 부서집니다.']}
+    ]},
+    {kind:'add',items:[
+      {t:'이제 니나브가 10, 20, 25레벨에 특수 능력을 선택합니다. 루테란과 같이 한 번 고른 능력은 고정되고 최대 3단계입니다.',sub:['다중 공격: 화살이 부채꼴로 2발, 3발, 4발 나가고, 발당 피해가 75%로 줄어듭니다.','떠다니는 화살: 공격할 때마다 몸 주변에 화살이 1발, 2발, 3발씩 쌓이고, 6발이 쌓이면 잠시 떠 있다가 주변 몬스터 6마리에게 무작위로 차례차례 날아갑니다. 떠다니는 동안은 피해를 주지 않고, 날아가는 동안에는 화살이 더 쌓이지 않습니다.','관통 화살: 화살이 더 굵어지고 판정이 15% 커지며, 단계마다 관통하는 몬스터가 1마리씩 늘어납니다.']},
+      {t:'이제 니나브가 25레벨에서 특수 능력을 고른 뒤, 무지개색으로 빛나는 선택지로 필살기 「천벌, 파르쿠니스」을 얻습니다.',sub:['몬스터를 100마리 처치할 때마다 사용할 수 있고, 스페이스바를 누르고 있으면 차징하고 떼면 발사합니다.','차징은 1, 2, 3단계가 있고 단계마다 0.75초씩 걸립니다. 차징 중에는 몸 주변으로 게이지가 빨려들고, 서서히 커지는 잔잔한 화면 흔들림이 생깁니다.','3단계가 된 뒤에도 2초 이상 차징하면 자동으로 발사됩니다.','화면에서 몬스터가 가장 많은 방향으로 번개 화살이 직선으로 화면 끝까지 뻗어나가며 지나가는 몬스터를 모두 맞힙니다. 니나브 몸이 뒤로 살짝 밀려나고, 발사할 때 화면이 흔들리며, 바닥에 번개 자국이 잠시 남습니다.','번개 화살은 단계마다 굵어지고, 맞은 몬스터의 최대 체력의 50%, 75%, 90% 피해를 줍니다.','처음 맞은 몬스터 주변 2명, 3명, 4명에게 번개가 전이되고, 번개에 맞은 몬스터는 1초간 감전되어 움직이지 못합니다.']}
+    ]},
+    {kind:'add',items:[
+      {t:'이제 로비 아래쪽, 두 상점 사이에 「훈련장 가는길」 포탈이 생겼습니다.',sub:['훈련장에서는 왼쪽 발판 위에서 E를 눌러 캐릭터를 고를 수 있습니다.','훈련장에는 5배 크기의 네모 몬스터 허수아비가 가만히 서 있고, 체력이 무한입니다.','필살기 게이지가 무한이고 25레벨 상태로 시작합니다.','기본, 특수 1, 특수 2, 특수 3 중에서 선택할 수 있고, 특수 능력은 3단계로 적용됩니다. Q를 누르면 다시 고를 수 있습니다.']}
+    ]},
+    {kind:'chg',items:[
+      '이제 아제나는 걷기 모션 없이 방향마다 한 프레임만 사용하고, 몸이 살짝 떠 있어 바닥에 그림자가 생깁니다.',
+      '니나브의 기본 공격이 더 이상 몬스터를 관통하지 않습니다. 관통 화살 특수 능력을 고르면 단계마다 1마리씩 관통합니다.',
+      '이제 아제나는 잠김 상태가 되어 선택할 수 없습니다.',
+      '아제나의 공격속도가 1.1회/초에서 0.8회/초로 낮아졌습니다.',
+      '아제나의 얼음 폭발 범위가 0.75배로 줄었습니다.',
+      '이제 전투 배경이 어두운 밤의 성 한복판으로 바뀝니다. 바닥은 석재 벽돌로 되어 있고, 금과 돌 부스러기, 벽돌 사이로 자란 이끼와 풀이 있으며, 곳곳에서 화로가 타오릅니다.'
+    ]}
+   ]},
+  {v:'0.3.3',title:'몬스터 도트 그래픽',
+   groups:[
+    {kind:'chg',items:[
+      '이제 동그라미 몬스터가 「핏빛 늑대」로 바뀝니다. 피 냄새를 따라 움직이는 맹수의 잔재입니다.',
+      '이제 세모 몬스터가 「피멸의 개」로 바뀝니다. 사람을 발견하면 무조건 달려드는 절멸의 추적자입니다.',
+      '이제 네모 몬스터가 「붉은 가고일」로 바뀝니다. 날개를 펼치고 덮쳐오는 하늘의 포식자입니다.',
+      '몬스터가 강해질수록 크기가 아니라 디테일이 늘어납니다.',
+      '이제 몬스터가 플레이어 쪽을 바라봅니다.',
+      '몬스터의 체력, 속도, 공격력, 충돌 범위는 그대로입니다.'
+    ]}
+   ]},
+  {v:'0.3.2',title:'캐릭터 그래픽 개편',
+   groups:[
+    {kind:'chg',items:[
+      '루테란 도트 그래픽이 새 디자인으로 바뀌었습니다. 풍성한 모피 어깨 장식, 은빛 판금 갑옷, 푸른 망토, 붉은 보석이 박힌 큰 검을 들고 있습니다.',
+      '니나브 도트 그래픽이 새 디자인으로 바뀌었습니다. 날개와 덩굴이 감긴 활을 든 모습입니다.',
+      '아제나 도트 그래픽이 새 디자인으로 바뀌었습니다. 뿔 달린 왕관과 깃털 망토 차림이고, 황금빛 구체를 곁에 띄우고 있습니다.',
+      '이제 루테란, 니나브, 아제나가 위, 아래, 왼쪽, 오른쪽 4방향으로 걷는 모션을 보여줍니다.',
+      '이제 루테란의 아래, 왼쪽, 오른쪽, 위 걷기 모션이 새 동작으로 바뀌었습니다.',
+      '이제 루테란이 휘두르는 칼 그래픽이 사라지고, 베는 궤적만 표시됩니다.',
+      '이제 루테란의 공격 사거리가 75에서 115로 늘어났습니다.',
+      '이제 몬스터가 1.5배 커졌습니다.',
+      '이제 니나브의 화살이 파랑, 초록, 에메랄드 빛이 감도는 마법 화살로 바뀌었고 더 커졌습니다.',
+      '이제 아제나의 얼음 조각이 더 커졌고, 범위 피해와 둔화 범위도 62에서 90으로 넓어졌습니다.',
+      '이제 게임 화면이 더 선명한 해상도로 그려집니다.'
+    ]}
+   ]},
+  {v:'0.3.1',title:'스탯 상점과 메달',
+   groups:[
+    {kind:'add',items:[
+      {t:'이제 로비의 스탯 상점에서 E 키로 강화를 구매합니다. 골드는 생존 시간으로 얻으며, 강화는 영구 적용됩니다.',sub:[
+        '골드: 6~10분 분당 1골드, 11~15분 분당 2골드, 16~20분 분당 3골드',
+        '모든 강화는 최대 5레벨, 레벨당 10골드',
+        '공격력 레벨당 +20% (최대 2배)','공격속도 레벨당 +14% (최대 1.7배)','치명타 확률 레벨당 +8%p','치명타 피해량 레벨당 +10%p','이동속도 레벨당 +8%','체력 레벨당 +40','방어력 레벨당 +8','생명력 흡수 레벨당 킬당 회복 +0.5','경험치 획득량 레벨당 +20% (최대 2배)'
+      ]},
+      '이제 클리어(20분 생존)하면 메달 1개를 얻습니다. 메달 사용처인 특수 스탯 상점은 아직 구현 중입니다.',
+      '이제 로비 우측 상단에 보유 골드와 메달이 항상 표시됩니다.'
+    ]},
+    {kind:'chg',items:[
+      '이제 인게임 레벨업에서 능력을 고르지 않습니다. 능력은 스탯 상점 강화로만 올립니다.',
+      '이제 레벨은 25까지만 오릅니다. 25레벨 이후에는 경험치를 얻어도 레벨업하지 않습니다.',
+      '이제 치명타 확률이 100%를 넘으면, 넘은 10%p마다 치명타 피해량이 2.5%p 늘어납니다.'
+    ]}
+  ]},
+
+  {v:'0.3.0',title:'아제나 추가',
+   groups:[
+    {kind:'add',items:[
+      {t:'새 캐릭터 아제나가 추가되었습니다.',sub:[
+        '체력 120','방어력 7','공격력 11','공격속도 초당 1.1회','이동속도 220','사거리 350','치명타 확률 60%','치명타 피해 175%',
+        '가장 가까운 적에게 얼음 조각을 날립니다',
+        '맞은 적과 주변 적의 이동속도가 80%로 줄어들고(2초), 주변 적은 작은 범위 피해(공격력의 50%)를 받습니다'
+      ]}
+    ]}
+  ]},
+
+  {v:'0.2.0',title:'니나브 추가',
+   groups:[
+    {kind:'add',items:[
+      {t:'새 캐릭터 니나브(궁수)가 추가되었습니다.',sub:[
+        '체력 100','방어력 5','공격력 6','공격속도 초당 1.8회','이동속도 300','치명타 확률 70%','사거리 300',
+        '가장 가까운 적에게 화살을 쏘며, 화살은 적 2마리까지 관통합니다'
+      ]},
+      '이제 로비에서 캐릭터 앞에 서서 E 키로 캐릭터를 선택합니다.',
+      '이제 포탈을 E 키로 입장합니다.',
+      '패치노트 페이지가 생겼습니다.'
+    ]},
+    {kind:'chg',items:[
+      '게임 이름이 서바이벌로 바뀌었습니다.',
+      '이제 루테란이 공격할 때 칼을 휘두르는 모습이 보입니다.',
+      '이제 로비에 들어오면 포탈 위쪽에서 아래를 바라본 채로 시작합니다.',
+      '이제 경험치 구슬은 인게임에 들어갈 때부터 생성됩니다.',
+      '이제 몹 체력이 시간에 따라 더 천천히 늘어납니다. 20분 시점의 기본 체력이 7배에서 4배가 됩니다.'
+    ]},
+    {kind:'del',items:[
+      '이제 로비 발판을 밟아도 캐릭터가 바뀌지 않습니다.',
+      '이제 포탈에서 W를 뗐다가 다시 누르는 방식으로 입장하지 않습니다.'
+    ]}
+  ]},
+
+  {v:'0.1.2',title:'루테란 스탯 조정과 능력 5레벨',
+   groups:[
+    {kind:'chg',items:[
+      {t:'루테란의 기본 스탯이 바뀌었습니다.',sub:[
+        '체력 150','방어력 9','공격력 8','공격속도 초당 1.3회','이동속도 250','사거리 75','베기 범위 120도','치명타 확률 30%','치명타 피해 150%'
+      ]},
+      '이제 방어력 수치가 곧 피해 감소 %입니다. 9이면 9% 감소, 100이면 피해를 받지 않습니다.',
+      '이제 생명력 흡수는 몹을 쓰러뜨릴 때 체력 0.5를 회복합니다.',
+      {t:'이제 모든 능력의 최대 레벨이 5이고, 레벨당 효과가 커졌습니다.',sub:[
+        '공격력 +30%','공격속도 +24%','이동속도 +16%','체력 +40','방어력 +8','경험치 획득량 +40%','치명타 피해 +50%p','치명타 확률 +10%p','생명력 흡수 킬당 회복 +0.5'
+      ]}
+    ]}
+  ]},
+
+  {v:'0.1.1',title:'이름과 머리 스타일',
+   groups:[
+    {kind:'chg',items:[
+      '게임 이름이 로스트아크 + 뱀서로 바뀌었습니다.',
+      '이제 루테란의 머리는 음영만 넣은 스타일이고, 가르마가 8:2로 바뀌었습니다. 가르마는 머리색보다 짙은 노랑입니다.',
+      '루테란의 피부색이 훨씬 밝아졌습니다.'
+    ]}
+  ]},
+
+  {v:'0.1.0',title:'로비와 20분 서바이벌',
+   groups:[
+    {kind:'add',items:[
+      '시작 화면이 로비로 바뀌었습니다. 카메라가 캐릭터를 따라다니는 유한 맵이고, 중앙 포탈로 입장합니다.',
+      '로비에 루테란 이름표, 잠긴 캐릭터 슬롯 2개, 잠긴 상점 2개(스탯 상점, 특수 스탯 상점)가 생겼습니다.',
+      {t:'이제 한 판이 총 20분입니다.',sub:['5분마다 웨이브가 오며, 약 1분간 스폰이 10배가 됩니다','우측 상단에 게임 시간이 표시됩니다']},
+      '이제 체력바가 캐릭터 머리 위에도 표시됩니다.'
+    ]},
+    {kind:'chg',items:[
+      '이동속도가 2배, 경험치 획득량이 절반이 되었고 공격력은 절반보다 조금 높게 낮아졌습니다.',
+      '경험치바가 화면 맨 위로 옮겨졌습니다.'
+    ]},
+    {kind:'del',items:['하단 조작 안내와 캐릭터 선택창이 사라졌습니다.']}
+  ]},
+
+  {v:'0.0.2',title:'도트 캐릭터',
+   groups:[
+    {kind:'add',items:[
+      '이제 캐릭터가 4방향 걷기 도트로 표시되며, 이동 방향과 공격 대상 방향을 바라봅니다.',
+      '캐릭터에 망토(겉 흰색, 안 파란색)와 가르마 머리가 생겼습니다.'
+    ]},
+    {kind:'chg',items:['캐릭터 이름이 수습 검사에서 국왕으로 바뀌었습니다.']}
+  ]},
+
+  {v:'0.0.1',title:'첫 버전',
+   groups:[
+    {kind:'add',items:[
+      '무한 맵 서바이벌이 시작되었습니다. 가장 가까운 적을 자동으로 공격합니다.',
+      '몹 3종(동그라미, 세모, 네모)이 나옵니다. 시간이 지날수록 세모와 네모가 나오고 이동속도가 올라갑니다.',
+      {t:'레벨업 능력 9종이 생겼습니다.',sub:['공격력','공격속도','치명타 확률','치명타 피해량','이동속도','체력','방어력','생명력 흡수','경험치 획득량']},
+      '경험치 조각이 맵에 생성되고 몹이 확정으로 떨어뜨립니다.',
+      '보물상자가 생겼습니다. 체력 25% 회복 또는 경험치 전체 흡수 중 하나를 고릅니다.'
+    ]}
+  ]}
+];
+
+const KIND={add:'추가',chg:'변경',del:'제거',fix:'수정'};
+const list=document.getElementById('list'),nav=document.getElementById('nav');
+const id=v=>'v'+v.replace(/\./g,'-');
+document.getElementById('cur-ver').textContent='v'+PATCHES[0].v;
+
+PATCHES.forEach((p,i)=>{
+  const a=document.createElement('a');
+  a.href='#'+id(p.v);a.textContent='v'+p.v;
+  nav.appendChild(a);
+
+  const e=document.createElement('article');
+  e.className='entry'+(i===0?' latest':'');e.id=id(p.v);
+  const meta=document.createElement('div');meta.className='meta';
+  meta.innerHTML='<span class="ver"></span>'+(i===0?'<span class="new">최신</span>':'');
+  meta.querySelector('.ver').textContent='v'+p.v;
+  const body=document.createElement('div');body.className='body';
+  const h=document.createElement('h2');h.textContent=p.title;body.appendChild(h);
+  p.groups.forEach(g=>{
+    const box=document.createElement('div');box.className='group';
+    const tag=document.createElement('span');tag.className='tag '+g.kind;tag.textContent=KIND[g.kind];
+    const ul=document.createElement('ul');
+    g.items.forEach(it=>{
+      const li=document.createElement('li');
+      if(typeof it==='string'){li.textContent=it}
+      else{
+        li.textContent=it.t;
+        const sub=document.createElement('ul');sub.className='sub';
+        it.sub.forEach(x=>{const l2=document.createElement('li');l2.textContent=x;sub.appendChild(l2)});
+        li.appendChild(sub);
+      }
+      ul.appendChild(li);
+    });
+    box.append(tag,ul);body.appendChild(box);
+  });
+  e.append(meta,body);list.appendChild(e);
+});
+
+/* 스크롤 위치에 맞춰 목차 강조 */
+const links=[...nav.querySelectorAll('a')];
+function mark(){
+  let cur=0;
+  PATCHES.forEach((p,i)=>{
+    const el=document.getElementById(id(p.v));
+    if(el.getBoundingClientRect().top<window.innerHeight*0.35)cur=i;
+  });
+  links.forEach((l,i)=>l.setAttribute('aria-current',i===cur?'true':'false'));
+}
+window.addEventListener('scroll',mark,{passive:true});mark();
+try{
+  const h=location.hash.slice(1);
+  if(h){const el=document.getElementById(h);if(el)el.scrollIntoView()}
+}catch(e){}
+</script>
