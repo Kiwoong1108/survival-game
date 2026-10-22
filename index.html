@@ -775,21 +775,21 @@ function drawLobby(){
 
   /* 이펙트: 퀘스트(9시), 업적(3시), 훈련장(6시), 인게임(중앙) */
   glowAt(QUESTZ.x,QUESTZ.y+4,'255,220,140',90,0.28);
-  fx('quest',QUESTZ.x,QUESTZ.y,1.35,1);
-  U(QUESTZ.x,QUESTZ.y+44,()=>{nameTag(0,0,'퀘스트',false);ctx.font='400 15px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#c9d3c8';ctx.fillText('구현중',0,28)});
+  fx('quest',QUESTZ.x,QUESTZ.y,0.45,1);
+  U(QUESTZ.x,QUESTZ.y+15,()=>{nameTag(0,0,'퀘스트',false);ctx.font='400 15px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#c9d3c8';ctx.fillText('구현중',0,28)});
 
   glowAt(ACHZ.x,ACHZ.y+4,'255,210,110',(L.near&&L.near.t==='ach')?120:90,(L.near&&L.near.t==='ach')?0.5:0.28);
-  fx('trophy',ACHZ.x,ACHZ.y,1.35,2);
-  U(ACHZ.x,ACHZ.y+44,()=>{nameTag(0,0,'업적',L.near&&L.near.t==='ach');ctx.font='400 15px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#f2c14e';
+  fx('trophy',ACHZ.x,ACHZ.y,0.45,2);
+  U(ACHZ.x,ACHZ.y+15,()=>{nameTag(0,0,'업적',L.near&&L.near.t==='ach');ctx.font='400 15px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#f2c14e';
     ctx.fillText('공격력 '+achLv('atk')+'/5',0,28);ctx.fillText('체력 '+achLv('hp')+'/5',0,46)});
 
   glowAt(PORTAL2.x,PORTAL2.y+4,'255,170,90',120,0.32);
-  fx('portal_gold',PORTAL2.x,PORTAL2.y,1.25,3);
-  U(PORTAL2.x,PORTAL2.y+44,()=>nameTag(0,0,'훈련장 가는길',L.near&&L.near.t==='portal2'));
+  fx('portal_gold',PORTAL2.x,PORTAL2.y,0.42,3);
+  U(PORTAL2.x,PORTAL2.y+20,()=>nameTag(0,0,'훈련장 가는길',L.near&&L.near.t==='portal2'));
 
   glowAt(PORTAL.x,PORTAL.y+6,'127,240,255',170,0.38);
-  fx('portal_blue',PORTAL.x,PORTAL.y,1.7,0);
-  U(PORTAL.x,PORTAL.y+48,()=>nameTag(0,0,'인게임',L.near&&L.near.t==='portal'));
+  fx('portal_blue',PORTAL.x,PORTAL.y,0.57,0);
+  U(PORTAL.x,PORTAL.y+10,()=>nameTag(0,0,'인게임',L.near&&L.near.t==='portal'));
 
   ctx.imageSmoothingEnabled=false;
   U(p.x,p.y,()=>drawChar(CH.id,0,0,p.dir,p.moving?Math.floor(p.anim*8):-1));
