@@ -492,6 +492,7 @@ const LOBBY_ART={"bg": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDA
 const LART={};
 for(const k in LOBBY_ART){const im=new Image();im.src=LOBBY_ART[k];LART[k]=im}
 const FX_W=112,FX_H=170;
+const LZ=2.0;   // 로비 카메라 줌 (배경과 오브젝트만 확대되고 캐릭터 크기는 그대로)
 /* 걸어 다닐 수 있는 바닥(타원)과 배치. 중앙 인게임, 6시 훈련장, 3시 업적, 9시 퀘스트 */
 const WALK={cx:962,cy:592,a:470,b:192};
 const SLOTS=[{x:770,y:462,ch:0},{x:1154,y:462,ch:1},{x:962,y:350,ch:-1}].map((s,i)=>({...s,ch:(s.ch>=0&&s.ch<CHARS.length&&CHARS[s.ch].id!=='azena')?s.ch:-1}));
@@ -507,7 +508,7 @@ const SWAP_T=0.25;
 const P_GLOW=1.0,P_FADE=0.45,P_HOLD=0.25;
 
 function newLobby(){
-  L={t:0,p:{x:962,y:690,dir:DIR_DOWN,anim:0,moving:false},near:null,act:null,flash:0};
+  L={t:0,p:{x:962,y:690,dir:DIR_DOWN,anim:0,moving:false},near:null,act:null,flash:0,cx:962,cy:690};
 }
 function toLobby(){
   bankGold();persist();
@@ -577,6 +578,7 @@ function updateLobby(dt){
   const p=L.p;
   L.t+=dt;
   L.flash=Math.max(0,L.flash-dt);
+  {const k=Math.min(1,dt*7);L.cx+=(p.x-L.cx)*k;L.cy+=(p.y-L.cy)*k}
   if(L.act){
     const a=L.act;a.time+=dt;
     p.moving=false;
@@ -715,12 +717,16 @@ function drawWallet(){
 }
 function drawLobby(){
   const p=L.p,t=L.t;
-  const camX=W>=LW?(LW-W)/2:clamp(p.x-W/2,0,LW-W),camY=H>=LH?(LH-H)/2:clamp(p.y-H/2,0,LH-H);
+  const z=LZ,vw=W/z,vh=H/z;
+  const camX=vw>=LW?(LW-vw)/2:clamp(L.cx-vw/2,0,LW-vw),camY=vh>=LH?(LH-vh)/2:clamp(L.cy-vh/2,0,LH-vh);
+  /* 확대 상태에서도 글자와 캐릭터는 원래 크기로 그리는 도우미 */
+  const U=(x,y,fn)=>{ctx.save();ctx.translate(x,y);ctx.scale(1/z,1/z);fn();ctx.restore()};
   ctx.setTransform(RS,0,0,RS,0,0);
   ctx.imageSmoothingEnabled=false;
   ctx.fillStyle='#0c0f14';ctx.fillRect(0,0,W,H);
   ctx.save();
-  ctx.translate(-Math.round(camX),-Math.round(camY));
+  ctx.scale(z,z);
+  ctx.translate(-camX,-camY);
 
   const lb=LART.bg;
   if(lb&&lb.complete&&lb.naturalWidth){ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(lb,0,0,LW,LH)}
@@ -741,69 +747,68 @@ function drawLobby(){
     ctx.beginPath();ctx.ellipse(s.x,s.y+2,48,16,0,0,TAU);ctx.stroke();
     if(s.ch>=0){
       ctx.imageSmoothingEnabled=false;
-      drawSprite(CHARS[s.ch].id,s.x,s.y+2,DIR_DOWN,1,100);
-      nameTag(s.x,s.y-120,CHARS[s.ch].name,sel);
+      U(s.x,s.y+2,()=>drawSprite(CHARS[s.ch].id,0,0,DIR_DOWN,1,100));
+      U(s.x,s.y-120/z*1.0,()=>nameTag(0,0,CHARS[s.ch].name,sel));
     }else{
-      drawLock(s.x,s.y-46,1);
-      lockedText(s.x,s.y-8);
+      U(s.x,s.y,()=>{drawLock(0,-46,1);lockedText(0,-8)});
     }
   });
 
   /* 상점 */
   for(const sh of SHOPS){
-    const w=200,h=100,x=sh.x-w/2,y=sh.y-h+22;
-    ctx.fillStyle='rgba(8,12,26,.72)';ctx.fillRect(x,y,w,h);
-    ctx.strokeStyle=sh.open?'#c9a24a':'#4a5570';ctx.lineWidth=2;ctx.strokeRect(x+1,y+1,w-2,h-2);
-    ctx.font='400 18px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillStyle='#cfd8cc';ctx.fillText(sh.label,sh.x,y+20);
-    if(sh.open){
-      drawCoins(sh.x,y+56);
-      ctx.font='400 18px "Do Hyeon",sans-serif';ctx.fillStyle='#f2c14e';
-      ctx.fillText(save.gold+' 골드 보유',sh.x,y+h-14);
-    }else{
-      drawLock(sh.x,y+54,0.8);
-      lockedText(sh.x,y+h-14);
-    }
+    U(sh.x,sh.y,()=>{
+      const w=200,h=100,x=-w/2,y=-h+22;
+      ctx.fillStyle='rgba(8,12,26,.72)';ctx.fillRect(x,y,w,h);
+      ctx.strokeStyle=sh.open?'#c9a24a':'#4a5570';ctx.lineWidth=2;ctx.strokeRect(x+1,y+1,w-2,h-2);
+      ctx.font='400 18px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle='#cfd8cc';ctx.fillText(sh.label,0,y+20);
+      if(sh.open){
+        drawCoins(0,y+56);
+        ctx.font='400 18px "Do Hyeon",sans-serif';ctx.fillStyle='#f2c14e';
+        ctx.fillText(save.gold+' 골드 보유',0,y+h-14);
+      }else{
+        drawLock(0,y+54,0.8);
+        lockedText(0,y+h-14);
+      }
+    });
   }
 
   /* 이펙트: 퀘스트(9시), 업적(3시), 훈련장(6시), 인게임(중앙) */
   glowAt(QUESTZ.x,QUESTZ.y+4,'255,220,140',90,0.28);
   fx('quest',QUESTZ.x,QUESTZ.y,1.35,1);
-  nameTag(QUESTZ.x,QUESTZ.y+44,'퀘스트',false);
-  ctx.font='400 15px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#c9d3c8';ctx.fillText('구현중',QUESTZ.x,QUESTZ.y+72);
+  U(QUESTZ.x,QUESTZ.y+44,()=>{nameTag(0,0,'퀘스트',false);ctx.font='400 15px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#c9d3c8';ctx.fillText('구현중',0,28)});
 
   glowAt(ACHZ.x,ACHZ.y+4,'255,210,110',(L.near&&L.near.t==='ach')?120:90,(L.near&&L.near.t==='ach')?0.5:0.28);
   fx('trophy',ACHZ.x,ACHZ.y,1.35,2);
-  nameTag(ACHZ.x,ACHZ.y+44,'업적',L.near&&L.near.t==='ach');
-  ctx.font='400 15px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#f2c14e';
-  ctx.fillText('공격력 '+achLv('atk')+'/5',ACHZ.x,ACHZ.y+70);ctx.fillText('체력 '+achLv('hp')+'/5',ACHZ.x,ACHZ.y+88);
+  U(ACHZ.x,ACHZ.y+44,()=>{nameTag(0,0,'업적',L.near&&L.near.t==='ach');ctx.font='400 15px "Do Hyeon",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#f2c14e';
+    ctx.fillText('공격력 '+achLv('atk')+'/5',0,28);ctx.fillText('체력 '+achLv('hp')+'/5',0,46)});
 
   glowAt(PORTAL2.x,PORTAL2.y+4,'255,170,90',120,0.32);
   fx('portal_gold',PORTAL2.x,PORTAL2.y,1.25,3);
-  nameTag(PORTAL2.x,PORTAL2.y+44,'훈련장 가는길',L.near&&L.near.t==='portal2');
+  U(PORTAL2.x,PORTAL2.y+44,()=>nameTag(0,0,'훈련장 가는길',L.near&&L.near.t==='portal2'));
 
   glowAt(PORTAL.x,PORTAL.y+6,'127,240,255',170,0.38);
   fx('portal_blue',PORTAL.x,PORTAL.y,1.7,0);
-  nameTag(PORTAL.x,PORTAL.y+48,'인게임',L.near&&L.near.t==='portal');
+  U(PORTAL.x,PORTAL.y+48,()=>nameTag(0,0,'인게임',L.near&&L.near.t==='portal'));
 
   ctx.imageSmoothingEnabled=false;
-  drawChar(CH.id,p.x,p.y,p.dir,p.moving?Math.floor(p.anim*8):-1);
+  U(p.x,p.y,()=>drawChar(CH.id,0,0,p.dir,p.moving?Math.floor(p.anim*8):-1));
 
-  const gy=p.y-26;
+  const gy=p.y-26/z;
   if(L.act&&L.act.t==='swap'){
     const k=clamp(L.act.time/SWAP_T,0,1);
-    drawGlow(p.x,gy,46+14*k,'255,238,170',0.9*k);
+    drawGlow(p.x,gy,(46+14*k)/z,'255,238,170',0.9*k);
   }
-  if(L.flash>0)drawGlow(p.x,gy,60,'255,238,170',0.75*L.flash/0.35);
+  if(L.flash>0)drawGlow(p.x,gy,60/z,'255,238,170',0.75*L.flash/0.35);
   if(L.act&&L.act.t==='portal'){
     const k=clamp(L.act.time/P_GLOW,0,1);
-    drawGlow(p.x,gy,36+44*k+Math.sin(L.act.time*16)*3,'127,240,255',0.95*k);
+    drawGlow(p.x,gy,(36+44*k+Math.sin(L.act.time*16)*3)/z,'127,240,255',0.95*k);
   }
 
   if(!L.act&&L.near){
     const n=L.near;
     if(n.t==='portal'||n.t==='portal2'||n.t==='shop'||n.t==='ach'||(n.t==='slot'&&SLOTS[n.i].ch!==selChar)){
-      drawKeyE(p.x,p.y-86+Math.sin(t*4)*2,t);
+      U(p.x,p.y,()=>drawKeyE(0,-86+Math.sin(t*4)*2,t));
     }
   }
   ctx.restore();
