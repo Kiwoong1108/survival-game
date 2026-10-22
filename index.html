@@ -3,7 +3,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>서바이벌</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -24,14 +23,14 @@
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+html,body{height:100%}
 body{
-  background:var(--bg);color:var(--fg);
+  background:#000;color:var(--fg);
   font:15px/1.55 var(--body);
-  padding-block:16px;
-  padding-left:max(16px,env(safe-area-inset-left,0px));
-  padding-right:max(16px,env(safe-area-inset-right,0px));
+  margin:0;padding:0;overflow:hidden;
 }
-.wrap{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+/* 전체 화면: 화면을 꽉 채우되 960x600 비율은 유지합니다 */
+.wrap{height:100%;container-type:size;display:grid;place-items:center;background:#000}
 header{display:flex;justify-content:space-between;align-items:baseline;gap:6px 16px;flex-wrap:wrap}
 h1{font:400 28px/1.1 var(--display);letter-spacing:.04em;margin:0;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .ver{font:400 10px/1 var(--pixel);color:var(--gold)}
@@ -39,7 +38,7 @@ h1{font:400 28px/1.1 var(--display);letter-spacing:.04em;margin:0;display:flex;a
 .best{color:var(--dim);font-size:13px;font-variant-numeric:tabular-nums}
 .plink{color:var(--gold);font-size:13px;text-decoration:none;border-bottom:1px solid transparent}
 .plink:hover,.plink:focus-visible{border-bottom-color:var(--gold);outline:none}
-.stage{position:relative;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#101a16}
+.stage{position:relative;width:min(100cqw,160cqh);aspect-ratio:960/600;overflow:hidden;background:#101a16}
 canvas#cv{display:block;width:100%;height:auto;aspect-ratio:960/600;touch-action:none}
 .ov{
   position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -117,7 +116,8 @@ canvas#cv{display:block;width:100%;height:auto;aspect-ratio:960/600;touch-action
 #shop-gold{color:var(--gold)}
 .stats{display:flex;flex-wrap:wrap;gap:6px 22px;justify-content:center;font-variant-numeric:tabular-nums}
 .stats span b{color:var(--gold);font-weight:700}
-#touch{display:none;justify-content:space-between;align-items:center;user-select:none;-webkit-user-select:none}
+#touch{display:none;justify-content:space-between;align-items:center;user-select:none;-webkit-user-select:none;position:fixed;left:0;right:0;bottom:0;padding:0 max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));pointer-events:none;z-index:5}
+#touch>*{pointer-events:auto;opacity:.78}
 .pad{width:140px;height:140px;border-radius:50%;border:1px solid var(--line);background:var(--panel);position:relative;touch-action:none}
 .knob{position:absolute;left:calc(50% - 28px);top:calc(50% - 28px);width:56px;height:56px;border-radius:50%;background:rgba(111,227,161,.3);border:1px solid var(--good);pointer-events:none}
 .ebtn{
@@ -134,13 +134,7 @@ canvas#cv{display:block;width:100%;height:auto;aspect-ratio:960/600;touch-action
 </style>
 
 <div class="wrap">
-  <header>
-    <h1>서바이벌 <span class="ver">v0.5.0</span></h1>
-    <div class="hr">
-      <span class="best" id="best"></span>
-      <a class="plink" href="patchnotes.html" target="_blank" rel="noopener">패치노트</a>
-    </div>
-  </header>
+  <span class="best" id="best" hidden></span>
 
   <div class="stage">
     <canvas id="cv" aria-label="서바이벌 게임 화면"></canvas>
