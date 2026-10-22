@@ -808,7 +808,8 @@ function drawLobby(){
   if(!L.act&&L.near){
     const n=L.near;
     if(n.t==='portal'||n.t==='portal2'||n.t==='shop'||n.t==='ach'||(n.t==='slot'&&SLOTS[n.i].ch!==selChar)){
-      U(p.x,p.y,()=>drawKeyE(0,-86+Math.sin(t*4)*2,t));
+      const ky={slot:()=>[SLOTS[n.i].x,SLOTS[n.i].y-60,-36],shop:()=>[SHOPS[0].x,SHOPS[0].y,-104],ach:()=>[ACHZ.x,ACHZ.y+15,-36],portal:()=>[PORTAL.x,PORTAL.y+10,-36],portal2:()=>[PORTAL2.x,PORTAL2.y+20,-36]}[n.t]();
+      U(ky[0],ky[1],()=>drawKeyE(0,ky[2]+Math.sin(t*4)*2,t));
     }
   }
   ctx.restore();
