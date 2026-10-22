@@ -789,7 +789,6 @@ function drawLobby(){
 
   glowAt(PORTAL.x,PORTAL.y+6,'127,240,255',170,0.38);
   fx('portal_blue',PORTAL.x,PORTAL.y,0.57,0);
-  U(PORTAL.x,PORTAL.y+10,()=>nameTag(0,0,'인게임',L.near&&L.near.t==='portal'));
 
   ctx.imageSmoothingEnabled=false;
   U(p.x,p.y,()=>drawChar(CH.id,0,0,p.dir,p.moving?Math.floor(p.anim*8):-1));
